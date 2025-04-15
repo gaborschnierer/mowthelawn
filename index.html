@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Redirecting...</title>
+    <script>
+      // Base destination URL
+      const baseUrl = "https://script.google.com/macros/s/AKfycbwGuX0UW6zBew3hp7pHfG59KT3DjHvB-fmSa1xiWGptHA2zQO6z2s-x-iQgwnJ6eJMn/exec?";
+
+      // Get everything after the "?" in the current URL
+      const query = window.location.search;
+
+      // Combine them and redirect
+      window.location.replace(baseUrl + query);
+    </script>
+  </head>
+  <body>
+    <p>Redirecting...</p>
+  </body>
+</html>

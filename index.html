@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hu">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mow the Lawn - Fűnyírás Emlékeztető</title>
+    <title>Fűnyírás Emlékeztető</title>
     <style>
         * {
             margin: 0;
@@ -16,11 +16,14 @@
             background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
             min-height: 100vh;
             padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .container {
-            max-width: 800px;
-            margin: 0 auto;
+            max-width: 500px;
+            width: 100%;
             background: white;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -35,31 +38,17 @@
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 2em;
+            margin-bottom: 5px;
         }
 
         .header p {
-            font-size: 1.1em;
+            font-size: 1em;
             opacity: 0.9;
         }
 
         .main-content {
             padding: 30px;
-        }
-
-        .form-section {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border: 2px solid #e9ecef;
-        }
-
-        .form-section h2 {
-            color: #2d3436;
-            margin-bottom: 20px;
-            font-size: 1.4em;
         }
 
         .form-group {
@@ -73,9 +62,7 @@
             color: #2d3436;
         }
 
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
+        .form-group input {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
@@ -84,9 +71,7 @@
             transition: border-color 0.3s;
         }
 
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
+        .form-group input:focus {
             outline: none;
             border-color: #74b9ff;
         }
@@ -101,6 +86,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: background 0.3s;
+            width: 100%;
         }
 
         .btn:hover {
@@ -112,97 +98,23 @@
             cursor: not-allowed;
         }
 
-        .reminders-section {
-            margin-top: 30px;
-        }
-
-        .reminders-section h2 {
-            color: #2d3436;
-            margin-bottom: 20px;
-            font-size: 1.4em;
-        }
-
-        .reminder-item {
-            background: white;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
-            transition: all 0.3s;
-        }
-
-        .reminder-item:hover {
-            border-color: #74b9ff;
-            box-shadow: 0 5px 15px rgba(116, 185, 255, 0.2);
-        }
-
-        .reminder-item.completed {
-            opacity: 0.7;
-            background: #f1f3f4;
-        }
-
-        .reminder-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .reminder-title {
-            font-size: 1.2em;
-            font-weight: 600;
-            color: #2d3436;
-        }
-
-        .reminder-date {
-            color: #636e72;
-            font-size: 0.9em;
-        }
-
-        .reminder-actions {
-            margin-top: 15px;
-        }
-
-        .btn-small {
-            padding: 8px 15px;
-            font-size: 14px;
-            margin-right: 10px;
-        }
-
-        .btn-complete {
-            background: #00b894;
-        }
-
-        .btn-delete {
-            background: #e17055;
-        }
-
-        .btn-delete:hover {
-            background: #d63031;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #636e72;
-        }
-
-        .error {
-            background: #ffe6e6;
-            color: #d63031;
+        .message {
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
-            border: 1px solid #fab1a0;
+            text-align: center;
         }
 
         .success {
             background: #e6ffe6;
             color: #00b894;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
             border: 1px solid #00b894;
+        }
+
+        .error {
+            background: #ffe6e6;
+            color: #d63031;
+            border: 1px solid #fab1a0;
         }
 
         @media (max-width: 768px) {
@@ -215,17 +127,8 @@
                 padding: 20px;
             }
             
-            .header h1 {
-                font-size: 2em;
-            }
-            
             .main-content {
                 padding: 20px;
-            }
-            
-            .reminder-header {
-                flex-direction: column;
-                align-items: flex-start;
             }
         }
     </style>
@@ -233,53 +136,24 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🌱 Mow the Lawn</h1>
-            <p>Fűnyírás Emlékeztető - Never forget to mow your lawn again!</p>
+            <h1>🌱 Fűnyírás Emlékeztető</h1>
+            <p>Jelöld meg, ha elvégezted a fűnyírást!</p>
         </div>
         
         <div class="main-content">
             <div id="messages"></div>
             
-            <div class="form-section">
-                <h2>📝 Add New Reminder</h2>
-                <form id="reminderForm">
-                    <div class="form-group">
-                        <label for="title">Reminder Title:</label>
-                        <input type="text" id="title" name="title" placeholder="e.g., Front yard grass cutting" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="date">Due Date:</label>
-                        <input type="date" id="date" name="date" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="notes">Notes (optional):</label>
-                        <textarea id="notes" name="notes" rows="3" placeholder="Any additional notes about this mowing task..."></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="priority">Priority:</label>
-                        <select id="priority" name="priority">
-                            <option value="low">Low</option>
-                            <option value="medium" selected>Medium</option>
-                            <option value="high">High</option>
-                        </select>
-                    </div>
-                    
-                    <button type="submit" class="btn" id="addBtn">
-                        <span id="addBtnText">Add Reminder</span>
-                        <span id="addBtnLoading" style="display: none;">Adding...</span>
-                    </button>
-                </form>
-            </div>
-            
-            <div class="reminders-section">
-                <h2>📋 Your Reminders</h2>
-                <div id="remindersContainer">
-                    <div class="loading">Loading reminders...</div>
+            <form id="completionForm">
+                <div class="form-group">
+                    <label for="date">Dátum:</label>
+                    <input type="date" id="date" name="date" required>
                 </div>
-            </div>
+                
+                <button type="submit" class="btn" id="submitBtn">
+                    <span id="submitBtnText">Fűnyírás elvégezve</span>
+                    <span id="submitBtnLoading" style="display: none;">Mentés...</span>
+                </button>
+            </form>
         </div>
     </div>
 
@@ -287,59 +161,18 @@
         // API base URL - Google Apps Script endpoint
         const API_BASE_URL = "https://script.google.com/macros/s/AKfycbwn1L0pqVNcrFhcNLKIE-HwVG9nsz2l_TsSBh2tImI49KrrGjf6potWhLJ_PI54v7s/exec";
 
-        // Demo mode - set to true for testing without backend
-        const DEMO_MODE = false;
-
-        // Local storage for demo data
-        let demoReminders = [];
-
         // DOM elements
-        const reminderForm = document.getElementById('reminderForm');
-        const remindersContainer = document.getElementById('remindersContainer');
+        const completionForm = document.getElementById('completionForm');
         const messagesDiv = document.getElementById('messages');
-        const addBtn = document.getElementById('addBtn');
-        const addBtnText = document.getElementById('addBtnText');
-        const addBtnLoading = document.getElementById('addBtnLoading');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitBtnText = document.getElementById('submitBtnText');
+        const submitBtnLoading = document.getElementById('submitBtnLoading');
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
-            loadReminders();
-            setupEventListeners();
             setDefaultDate();
-            loadDemoData();
+            setupEventListeners();
         });
-
-        function loadDemoData() {
-            // Load demo data from localStorage or create initial data
-            const stored = localStorage.getItem('mowtheLawnDemo');
-            if (stored) {
-                demoReminders = JSON.parse(stored);
-            } else {
-                demoReminders = [
-                    {
-                        id: 'demo1',
-                        title: 'Front yard mowing',
-                        date: new Date().toISOString().split('T')[0],
-                        notes: 'Be careful around the flower beds',
-                        priority: 'high',
-                        completed: false
-                    },
-                    {
-                        id: 'demo2',
-                        title: 'Back yard cleanup',
-                        date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                        notes: '',
-                        priority: 'medium',
-                        completed: true
-                    }
-                ];
-                saveDemoData();
-            }
-        }
-
-        function saveDemoData() {
-            localStorage.setItem('mowtheLawnDemo', JSON.stringify(demoReminders));
-        }
 
         function setDefaultDate() {
             // Set default date to today
@@ -348,121 +181,30 @@
         }
 
         function setupEventListeners() {
-            reminderForm.addEventListener('submit', handleFormSubmit);
+            completionForm.addEventListener('submit', handleFormSubmit);
         }
 
         async function handleFormSubmit(event) {
             event.preventDefault();
             
-            const formData = new FormData(reminderForm);
-            const reminderData = {
-                action: 'add',
-                title: formData.get('title'),
-                date: formData.get('date'),
-                notes: formData.get('notes'),
-                priority: formData.get('priority')
+            const formData = new FormData(completionForm);
+            const completionData = {
+                action: 'complete',
+                date: formData.get('date')
             };
 
             setLoading(true);
             clearMessages();
 
             try {
-                if (DEMO_MODE || await isAPIUnavailable()) {
-                    // Demo mode - add to local data
-                    const newReminder = {
-                        id: 'demo_' + Date.now(),
-                        title: reminderData.title,
-                        date: reminderData.date,
-                        notes: reminderData.notes,
-                        priority: reminderData.priority,
-                        completed: false
-                    };
-                    demoReminders.push(newReminder);
-                    saveDemoData();
-                    showMessage('Reminder added successfully! (Demo mode - refresh to try API again)', 'success');
-                    displayReminders(demoReminders);
-                } else {
-                    const response = await makeAPICall(reminderData);
-                    showMessage('Reminder added successfully!', 'success');
-                    loadReminders();
-                }
-                
-                reminderForm.reset();
+                await makeAPICall(completionData);
+                showMessage('Fűnyírás sikeresen rögzítve erre a dátumra: ' + formatDate(completionData.date), 'success');
+                // Reset form to today's date
                 setDefaultDate();
             } catch (error) {
-                showMessage('Error adding reminder: ' + error.message, 'error');
+                showMessage('Hiba történt: ' + error.message, 'error');
             } finally {
                 setLoading(false);
-            }
-        }
-
-        async function loadReminders() {
-            try {
-                let reminders;
-                if (DEMO_MODE) {
-                    reminders = demoReminders;
-                } else {
-                    const response = await makeAPICall({ action: 'list' });
-                    reminders = response.reminders || [];
-                }
-                displayReminders(reminders);
-            } catch (error) {
-                console.warn('API call failed, falling back to demo mode:', error);
-                showMessage('⚠️ API temporarily unavailable. Showing demo data. Refresh to try again.', 'error');
-                displayReminders(demoReminders);
-            }
-        }
-
-        async function completeReminder(id) {
-            try {
-                if (DEMO_MODE || await isAPIUnavailable()) {
-                    // Demo mode - update local data
-                    const reminder = demoReminders.find(r => r.id === id);
-                    if (reminder) {
-                        reminder.completed = true;
-                        saveDemoData();
-                        showMessage('Reminder marked as completed! (Demo mode)', 'success');
-                        displayReminders(demoReminders);
-                    }
-                } else {
-                    await makeAPICall({ action: 'complete', id: id });
-                    showMessage('Reminder marked as completed!', 'success');
-                    loadReminders();
-                }
-            } catch (error) {
-                showMessage('Error completing reminder: ' + error.message, 'error');
-            }
-        }
-
-        async function deleteReminder(id) {
-            if (!confirm('Are you sure you want to delete this reminder?')) {
-                return;
-            }
-
-            try {
-                if (DEMO_MODE || await isAPIUnavailable()) {
-                    // Demo mode - update local data
-                    demoReminders = demoReminders.filter(r => r.id !== id);
-                    saveDemoData();
-                    showMessage('Reminder deleted successfully! (Demo mode)', 'success');
-                    displayReminders(demoReminders);
-                } else {
-                    await makeAPICall({ action: 'delete', id: id });
-                    showMessage('Reminder deleted successfully!', 'success');
-                    loadReminders();
-                }
-            } catch (error) {
-                showMessage('Error deleting reminder: ' + error.message, 'error');
-            }
-        }
-
-        async function isAPIUnavailable() {
-            try {
-                // Quick test call to see if API is available
-                await makeAPICall({ action: 'ping' });
-                return false;
-            } catch (error) {
-                return true;
             }
         }
 
@@ -482,7 +224,7 @@
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`HTTP hiba! Státusz: ${response.status}`);
             }
 
             const result = await response.json();
@@ -494,66 +236,21 @@
             return result;
         }
 
-        function displayReminders(reminders) {
-            if (reminders.length === 0) {
-                remindersContainer.innerHTML = `
-                    <div style="text-align: center; color: #636e72; padding: 40px;">
-                        <p style="font-size: 1.2em;">🌿 No reminders yet!</p>
-                        <p>Add your first lawn mowing reminder above.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const remindersHTML = reminders.map(reminder => {
-                const dueDate = new Date(reminder.date);
-                const isOverdue = dueDate < new Date() && !reminder.completed;
-                const dateFormatted = dueDate.toLocaleDateString();
-                
-                return `
-                    <div class="reminder-item ${reminder.completed ? 'completed' : ''}">
-                        <div class="reminder-header">
-                            <div class="reminder-title">
-                                ${reminder.completed ? '✅' : '📌'} ${escapeHtml(reminder.title)}
-                                ${isOverdue ? ' <span style="color: #e17055;">⚠️ OVERDUE</span>' : ''}
-                            </div>
-                            <div class="reminder-date">
-                                Due: ${dateFormatted}
-                                ${reminder.priority !== 'medium' ? `<br>Priority: ${reminder.priority.toUpperCase()}` : ''}
-                            </div>
-                        </div>
-                        ${reminder.notes ? `<p style="color: #636e72; margin-bottom: 10px;">${escapeHtml(reminder.notes)}</p>` : ''}
-                        <div class="reminder-actions">
-                            ${!reminder.completed ? `
-                                <button class="btn btn-small btn-complete" onclick="completeReminder('${reminder.id}')">
-                                    Mark Complete
-                                </button>
-                            ` : ''}
-                            <button class="btn btn-small btn-delete" onclick="deleteReminder('${reminder.id}')">
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            remindersContainer.innerHTML = remindersHTML;
-        }
-
         function setLoading(loading) {
-            addBtn.disabled = loading;
+            submitBtn.disabled = loading;
             if (loading) {
-                addBtnText.style.display = 'none';
-                addBtnLoading.style.display = 'inline';
+                submitBtnText.style.display = 'none';
+                submitBtnLoading.style.display = 'inline';
             } else {
-                addBtnText.style.display = 'inline';
-                addBtnLoading.style.display = 'none';
+                submitBtnText.style.display = 'inline';
+                submitBtnLoading.style.display = 'none';
             }
         }
 
         function showMessage(message, type) {
+            clearMessages();
             const messageDiv = document.createElement('div');
-            messageDiv.className = type;
+            messageDiv.className = 'message ' + type;
             messageDiv.textContent = message;
             messagesDiv.appendChild(messageDiv);
 
@@ -567,10 +264,9 @@
             messagesDiv.innerHTML = '';
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('hu-HU');
         }
     </script>
 </body>

@@ -1,19 +1,273 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Redirecting...</title>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fűnyírás Emlékeztető</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #00b894;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #74b9ff;
+        }
+
+        .btn {
+            background: #00b894;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #00a085;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .success {
+            background: #e6ffe6;
+            color: #00b894;
+            border: 1px solid #00b894;
+        }
+
+        .error {
+            background: #ffe6e6;
+            color: #d63031;
+            border: 1px solid #fab1a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 Fűnyírás Emlékeztető</h1>
+            <p>Jelöld meg, ha elvégezted a fűnyírást!</p>
+        </div>
+        
+        <div class="main-content">
+            <div id="messages"></div>
+            
+            <form id="completionForm">
+                <div class="form-group">
+                    <label for="date">Dátum:</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                
+                <button type="submit" class="btn" id="submitBtn">
+                    <span id="submitBtnText">Fűnyírás elvégezve</span>
+                    <span id="submitBtnLoading" style="display: none;">Mentés...</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script>
-      // Base destination URL
-      const baseUrl = "https://script.google.com/macros/s/AKfycbwn1L0pqVNcrFhcNLKIE-HwVG9nsz2l_TsSBh2tImI49KrrGjf6potWhLJ_PI54v7s/exec";
+        // API base URL - Google Apps Script endpoint
+        const API_BASE_URL = "https://script.google.com/macros/s/AKfycbwn1L0pqVNcrFhcNLKIE-HwVG9nsz2l_TsSBh2tImI49KrrGjf6potWhLJ_PI54v7s/exec";
 
-      // Get everything after the "?" in the current URL
-      const query = window.location.search;
+        // DOM elements
+        const completionForm = document.getElementById('completionForm');
+        const messagesDiv = document.getElementById('messages');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitBtnText = document.getElementById('submitBtnText');
+        const submitBtnLoading = document.getElementById('submitBtnLoading');
 
-      // Combine them and redirect
-      window.location.replace(baseUrl + query);
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            setDefaultDate();
+            setupEventListeners();
+        });
+
+        function setDefaultDate() {
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+        }
+
+        function setupEventListeners() {
+            completionForm.addEventListener('submit', handleFormSubmit);
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(completionForm);
+            const completionData = {
+                action: 'complete',
+                date: formData.get('date')
+            };
+
+            setLoading(true);
+            clearMessages();
+
+            try {
+                await makeAPICall(completionData);
+                showMessage('Fűnyírás sikeresen rögzítve erre a dátumra: ' + formatDate(completionData.date), 'success');
+                // Reset form to today's date
+                setDefaultDate();
+            } catch (error) {
+                showMessage('Hiba történt: ' + error.message, 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function makeAPICall(data) {
+            const url = new URL(API_BASE_URL);
+            
+            // Add data as query parameters
+            Object.keys(data).forEach(key => {
+                if (data[key] !== null && data[key] !== undefined) {
+                    url.searchParams.append(key, data[key]);
+                }
+            });
+
+            const response = await fetch(url.toString(), {
+                method: 'GET',
+                mode: 'cors'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP hiba! Státusz: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (result.error) {
+                throw new Error(result.error);
+            }
+
+            return result;
+        }
+
+        function setLoading(loading) {
+            submitBtn.disabled = loading;
+            if (loading) {
+                submitBtnText.style.display = 'none';
+                submitBtnLoading.style.display = 'inline';
+            } else {
+                submitBtnText.style.display = 'inline';
+                submitBtnLoading.style.display = 'none';
+            }
+        }
+
+        function showMessage(message, type) {
+            clearMessages();
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + type;
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+
+        function clearMessages() {
+            messagesDiv.innerHTML = '';
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('hu-HU');
+        }
     </script>
-  </head>
-  <body>
-    <p>Redirecting...</p>
-  </body>
+</body>
 </html>

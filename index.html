@@ -37,17 +37,51 @@
     const SCRIPT_DEPLOY_ID = "AKfycby3sNnPRs__mZ74F6271Oi4h6pxEBMi58dtFdLxpNfjTUVPQZsI04yJdVYXXosJ7iQd"; // e.g. AKfycbw...etc
     const API_KEY = "3SRQotIXKECVGbwIXKzS1QnuHku13zpdrsX0u6KhXCVSxVip3MlGn0MiVWXe17Y6";
     const API_URL = "https://script.google.com/macros/s/" + SCRIPT_DEPLOY_ID + "/exec";
-    //const PROXY_URL = "https://corsproxy.io/?" + encodeURIComponent(API_URL);
+
+    // Parse URL parameters
+    function getUrlParameter(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
 
     // Helper to show/hide elements
     function show(id) { document.getElementById(id).classList.remove("hidden"); }
     function hide(id) { document.getElementById(id).classList.add("hidden"); }
 
-    // Always hide loading spinner and error on initial load
+    // Check authorization and initialize page
     window.addEventListener("DOMContentLoaded", function() {
       hide("loading");
       hide("error-message");
       hide("success-message");
+
+      // Check if key parameter exists and validate it
+      const urlKey = getUrlParameter('key');
+      if (urlKey) {
+        if (urlKey !== API_KEY) {
+          // Show unauthorized message
+          show("error-message");
+          document.getElementById("error-message").textContent = "Nem jogosult felhasználó! Hibás API kulcs.";
+          document.getElementById("submit-btn").disabled = true;
+          return;
+        }
+      } else {
+        // No key provided
+        show("error-message");
+        document.getElementById("error-message").textContent = "Nem jogosult felhasználó! API kulcs szükséges.";
+        document.getElementById("submit-btn").disabled = true;
+        return;
+      }
+
+      // If we get here, the key is valid
+      // Set the date field from URL parameter if provided
+      const urlDate = getUrlParameter('date');
+      if (urlDate) {
+        // Validate date format (YYYY-MM-DD)
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (dateRegex.test(urlDate)) {
+          document.getElementById("date").value = urlDate;
+        }
+      }
     });
 
     document.getElementById("submit-btn").onclick = async function() {
@@ -60,7 +94,7 @@
       show("loading");
 
       const actualDate = document.getElementById("date").value;
-      const plannedDate = actualDate; // Or set this as needed
+      const plannedDate = getUrlParameter('date') || actualDate; // Use URL date parameter or fallback to actual date
 
       if (!actualDate) {
         show("error-message");

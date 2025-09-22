@@ -1,19 +1,109 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Redirecting...</title>
-    <script>
-      // Base destination URL
-      const baseUrl = "https://script.google.com/macros/s/AKfycbwn1L0pqVNcrFhcNLKIE-HwVG9nsz2l_TsSBh2tImI49KrrGjf6potWhLJ_PI54v7s/exec";
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fűnyírás visszajelzés</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2em 1em; max-width: 600px; margin: auto; color: #333; font-size: 16px; }
+    h1 { font-size: 1.5em; margin-bottom: 0.5em; color: #2c3e50; }
+    label { display: block; margin-bottom: 0.3em; font-weight: bold; }
+    input[type="date"] { width: 100%; padding: 0.6em; margin-bottom: 1em; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+    button { background-color: #4CAF50; color: white; border: none; padding: 0.7em 1em; border-radius: 5px; font-size: 1em; cursor: pointer; width: 100%; }
+    button:disabled { background-color: #9ccc9c; }
+    .hidden { display: none; }
+    .error { background-color: #fdd; color: #900; padding: 1em; border: 1px solid #c00; border-radius: 4px; margin-bottom: 1em; }
+    .loading { font-size: 1em; color: #555; margin-top: 1em; display: flex; align-items: center; gap: 0.5em; }
+    .loading::before { content: "⏳"; }
+    #success-message p { margin-top: 1em; background-color: #e8f5e9; padding: 1em; border-left: 4px solid #4CAF50; border-radius: 4px; }
+    .loading.hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <h1>✅ Fűnyírás visszajelzés</h1>
+  <div id="form-container">
+    <label for="date">A fűnyírás tényleges dátuma:</label>
+    <input type="date" id="date" name="date" />
+    <button id="submit-btn">Készre jelölöm!</button>
+    <div id="loading" class="loading hidden">Kérlek várj, feldolgozás folyamatban...</div>
+    <div id="error-message" class="error hidden"></div>
+  </div>
+  <div id="success-message" class="hidden">
+    <p id="mark-task-message"></p>
+    <p id="notify-message" style="white-space: pre-wrap; margin: 0;"></p>
+  </div>
+  <script>
+    // CONFIG: Fill these out!
+    const SCRIPT_DEPLOY_ID = "AKfycby3sNnPRs__mZ74F6271Oi4h6pxEBMi58dtFdLxpNfjTUVPQZsI04yJdVYXXosJ7iQd"; // e.g. AKfycbw...etc
+    const API_KEY = "3SRQotIXKECVGbwIXKzS1QnuHku13zpdrsX0u6KhXCVSxVip3MlGn0MiVWXe17Y6";
+    const API_URL = "https://script.google.com/macros/s/" + SCRIPT_DEPLOY_ID + "/exec";
+    //const PROXY_URL = "https://corsproxy.io/?" + encodeURIComponent(API_URL);
 
-      // Get everything after the "?" in the current URL
-      const query = window.location.search;
+    // Helper to show/hide elements
+    function show(id) { document.getElementById(id).classList.remove("hidden"); }
+    function hide(id) { document.getElementById(id).classList.add("hidden"); }
 
-      // Combine them and redirect
-      window.location.replace(baseUrl + query);
-    </script>
-  </head>
-  <body>
-    <p>Redirecting...</p>
-  </body>
+    // Always hide loading spinner and error on initial load
+    window.addEventListener("DOMContentLoaded", function() {
+      hide("loading");
+      hide("error-message");
+      hide("success-message");
+    });
+
+    document.getElementById("submit-btn").onclick = async function() {
+      hide("success-message");
+      hide("error-message");
+
+      const button = document.getElementById("submit-btn");
+      const loading = document.getElementById("loading");
+      button.disabled = true;
+      show("loading");
+
+      const actualDate = document.getElementById("date").value;
+      const plannedDate = actualDate; // Or set this as needed
+
+      if (!actualDate) {
+        show("error-message");
+        document.getElementById("error-message").textContent = "Kérlek, válassz dátumot!";
+        button.disabled = false;
+        hide("loading");
+        return;
+      }
+
+      try {
+        // Use doGet (GET request) instead of POST
+        const url = API_URL +
+          "?key=" + encodeURIComponent(API_KEY) +
+          "&action=completeAndNotify" +
+          "&actualDate=" + encodeURIComponent(actualDate) +
+          "&plannedDate=" + encodeURIComponent(plannedDate);
+        const resp = await fetch(url);
+        let result;
+        try {
+          result = await resp.json();
+        } catch (e) {
+          result = { error: "Nem sikerült értelmezni a választ a szervertől." };
+        }
+
+        if (result.error) {
+          show("error-message");
+          document.getElementById("error-message").textContent = typeof result.error === "string"
+            ? result.error
+            : JSON.stringify(result.error, null, 2);
+        } else {
+          hide("form-container");
+          show("success-message");
+          document.getElementById("mark-task-message").textContent = result.markTaskMessage || '';
+          document.getElementById("notify-message").textContent = result.notifyMessage || '';
+        }
+      } catch (err) {
+        show("error-message");
+        document.getElementById("error-message").textContent = "Hálózati hiba: " + err;
+      }
+
+      button.disabled = false;
+      hide("loading");
+    };
+  </script>
+</body>
 </html>
